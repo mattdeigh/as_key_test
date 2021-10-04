@@ -1,0 +1,10 @@
+<ul>
+  <% @documents.each do |document| %>
+    <li>
+      <% if document.file.attached? %>
+        <%= image_tag document.file.variant(resize: "2500x2500>").processed.service_url %>
+      <% end %>
+      <%= document.name %>
+    </li>
+  <% end %>
+</ul>
