@@ -1,18 +1,22 @@
 class InDirectUploadsController < ActiveStorage::DirectUploadsController
-  around_action :set_modify_active_storage_key
   skip_forgery_protection
 
-  private
-
-  def set_modify_active_storage_key
-    ActiveStorage::Blob.class_variable_set(:@@modified_key, modified_active_storage_key)
-    yield
-    ActiveStorage::Blob.class_variable_set(:@@modified_key, nil)
+  def create
+    blob = ActiveStorage::Blob.new(blob_args)
+    blob.key = generate_key_with_prefix
+    blob.save
+    render json: direct_upload_json(blob)
   end
+
+  private
 
   def modified_active_storage_key
     if params[:model].present? && params[:email].present?
       "#{params[:model]}/#{params[:email]}"
     end
+  end
+
+  def generate_key_with_prefix
+    File.join modified_active_storage_key, ActiveStorage::Blob.generate_unique_secure_token
   end
 end
